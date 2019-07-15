@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
@@ -57,9 +58,9 @@ public class ApiFunctions {
                 Collections.singletonList((request, body, execution) -> {
                     return execution.execute(request, body);
                 }));
-        var token = restClient.postForEntity(String.format("/authenticate?username=%s&password=%s", username, password), null, Map.class);
-        var tokenHeaders = token.getHeaders();
-        var access_token = tokenHeaders.getOrDefault(SecurityConstants.TOKEN_HEADER, Collections.singletonList("no token")).get(0);
+        ResponseEntity<Map> token = restClient.postForEntity(String.format("/authenticate?username=%s&password=%s", username, password), null, Map.class);
+        HttpHeaders tokenHeaders = token.getHeaders();
+        String access_token = tokenHeaders.getOrDefault(SecurityConstants.TOKEN_HEADER, Collections.singletonList("no token")).get(0);
         assertThat(access_token, not(equalTo("no token")));
         restClient.getRestTemplate().setInterceptors(
                 Collections.singletonList((request, body, execution) -> {
@@ -140,12 +141,13 @@ public class ApiFunctions {
     }
 
     public ApplicationUser findUserByAdmin(String userName){
-        var allUserRs = authAdmin()
+        ResponseEntity<List<ApplicationUser>> allUserRs = authAdmin()
                 .restClientWithoutErrorHandler()
-                .exchange("/users/all", HttpMethod.GET,null, new ParameterizedTypeReference<List<ApplicationUser>>(){} );
-        var allUsers = allUserRs.getBody();
+                .exchange("/users/all", HttpMethod.GET, null, new ParameterizedTypeReference<List<ApplicationUser>>() {
+                });
+        List<ApplicationUser> allUsers = allUserRs.getBody();
         assert allUsers != null;
-        var foundUsers = allUsers.stream()
+        List<ApplicationUser> foundUsers = allUsers.stream()
                 .filter(u -> u.getUsername().equals(userName))
                 .collect(Collectors.toList());
         assertThat(foundUsers.size(), is(1));

@@ -2,8 +2,8 @@ package integration;
 
 import com.codeborne.selenide.logevents.SelenideLogger;
 import com.stasdev.backend.BackendApplication;
-import common.logs.AllureSelenide;
 import common.ApiFunctions;
+import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;

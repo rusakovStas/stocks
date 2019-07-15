@@ -1,5 +1,6 @@
 package api;
 
+import com.stasdev.backend.entitys.ApplicationUser;
 import common.preconditions.CreateUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
@@ -85,7 +86,7 @@ class UsersControllerTest extends CommonApiTest{
         String userName = "UserForCheckCreate";
         preConditionExecutor.executeAndAddToQueueToUndo(new CreateUser(userName, apiFunctions));
 
-        var createdUser = apiFunctions.findUserByAdmin(userName);
+        ApplicationUser createdUser = apiFunctions.findUserByAdmin(userName);
 
         assertThat(createdUser.getUsername(), equalTo(userName));
         assertThat(createdUser.getPassword(), notNullValue());//пароль не проверяем потому что зашифровано

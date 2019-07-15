@@ -1,22 +1,31 @@
+buildscript {
+	ext {
+		springBootVersion = '2.1.0.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
 plugins {
-	id 'org.springframework.boot' version '2.2.0.M3'
 	id 'java'
 	id 'idea'
+	id "org.springframework.boot" version "2.1.0.RELEASE"
+	id "io.spring.dependency-management" version "1.0.6.RELEASE"
 	id "de.solugo.gradle.nodejs" version "0.6.0"
 	id 'io.qameta.allure' version '2.5'
 }
 
-apply plugin: 'io.spring.dependency-management'
+group = 'com.stasdev'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
 
 repositories {
 	mavenCentral()
-	maven { url 'https://repo.spring.io/snapshot' }
-	maven { url 'https://repo.spring.io/milestone' }
 }
-
-group = 'com.stasdev'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
 
 
 dependencies {
@@ -31,13 +40,16 @@ dependencies {
 	runtime group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.10.6'
 	runtime group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.10.6'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	
-	testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.0')
-	testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.4.0')
-	testImplementation('com.codeborne:selenide:5.2.3')
-	testImplementation('io.qameta.allure:allure-junit5:2.8.1')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+
+	testImplementation('org.junit.jupiter:junit-jupiter-api:5.3.1')
+	testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.3.1')
+
+	testCompile group: 'org.mockito', name: 'mockito-core', version: '2.23.0'
+	testImplementation('com.codeborne:selenide:5.2.1')
+
+	testImplementation('io.qameta.allure:allure-selenide:2.8.1')
+	testRuntimeOnly('io.qameta.allure:allure-junit5:2.8.1')
 }
 
 nodejs {
@@ -57,6 +69,12 @@ task copyFrontBuildToPublic(type: Copy) {
 
 task clearPublic(type: Delete){
 	project.delete(files("${project.projectDir}/src/main/resources/public/"))
+}
+
+def profiles = 'dev'
+
+bootRun {
+	args = ["--spring.profiles.active=" + profiles]
 }
 
 apply from: rootProject.file('gradle/tests.gradle')
