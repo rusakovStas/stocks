@@ -4,6 +4,8 @@ import com.stasdev.backend.entitys.Allocation;
 import com.stasdev.backend.entitys.ApplicationUser;
 import com.stasdev.backend.entitys.Stock;
 import com.stasdev.backend.entitys.StockSummary;
+import com.stasdev.backend.errors.InvalidStock;
+import com.stasdev.backend.errors.StockIsAlreadyInFavorite;
 import com.stasdev.backend.errors.UserNotFound;
 import com.stasdev.backend.repos.ApplicationUserRepository;
 import com.stasdev.backend.repos.StocksRepository;
@@ -51,11 +53,15 @@ public class StocksServiceImpl implements StocksService {
 
     @Override
     public Stock addStockToFavorite(Stock stock, String userName) {
-        Stock priceForStock = iexService.getPriceAndSectorForStock(stock);
         ApplicationUser currentUser = userRepository.findByUsername(userName).orElseThrow(() -> new UserNotFound("User with name " + userName + " not found"));
-        priceForStock.getUsers().add(currentUser);
-        currentUser.getStocks().add(priceForStock);
-        return stocksRepository.saveAndFlush(priceForStock);
+        this.validateStock(stock);
+        if (currentUser.getStocks().contains(stock)){
+            throw new StockIsAlreadyInFavorite("Stock with symbol "+ stock.getSymbol() + " is already in your favorite list");
+        }
+        Stock stockWithPriceAndSector = iexService.getPriceAndSectorForStock(stock);
+        stockWithPriceAndSector.getUsers().add(currentUser);
+        currentUser.getStocks().add(stockWithPriceAndSector);
+        return stocksRepository.saveAndFlush(stockWithPriceAndSector);
     }
 
     @Override
@@ -97,5 +103,14 @@ public class StocksServiceImpl implements StocksService {
         return new StockSummary()
                 .setAllocations(allocations)
                 .setValue(value);
+    }
+
+    private void validateStock(Stock stock){
+        if (stock.getSymbol() == null || stock.getSymbol().isEmpty()){
+            throw new InvalidStock("Symbol can't be null");
+        }
+        if (stock.getVolume() == null ){
+            throw new InvalidStock("Volume can't be null");
+        }
     }
 }

@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 public class Stock {
@@ -19,6 +16,7 @@ public class Stock {
     private String symbol;
     private String sector;
     private BigDecimal price;
+//  TODO в теории данное поле лучше вынести в отдельную таблицу
     private BigDecimal volume;
     private String name;
 
@@ -108,5 +106,18 @@ public class Stock {
     public Stock setSector(String sector) {
         this.sector = sector;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Stock)) return false;
+        Stock stock = (Stock) o;
+        return getSymbol().equals(stock.getSymbol());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSymbol());
     }
 }

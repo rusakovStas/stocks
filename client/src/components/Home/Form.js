@@ -13,9 +13,12 @@ import {
 	Modal,
 	ModalBody,
 	ModalHeader,
-	Table
+	Table,
+	Alert
 } from "reactstrap";
 import NumberFormat from "react-number-format";
+import FormButton from "../commons/FormButton";
+import InlineError from "../commons/InlineError";
 
 class StocksForm extends React.Component {
 	state = {
@@ -27,7 +30,8 @@ class StocksForm extends React.Component {
 			volume: ""
 		},
 		open: false,
-		loading: false
+		loading: false,
+		errors: {}
 	};
 
 	show = val => {
@@ -51,7 +55,31 @@ class StocksForm extends React.Component {
 	};
 
 	addToFavorite = () => {
-		this.props.add(this.state.data);
+		const errors = this.validate(this.state.data);
+		this.setState({ errors });
+		if (Object.keys(errors).length === 0) {
+			this.setState({ loading: true, errors: {} });
+			this.props
+				.add(this.state.data)
+				.catch(err => {
+					this.setState({
+						errors: { global: err.response.data.message }
+					});
+					this.setState({ loading: false });
+				})
+				.finally(() => {
+					this.setState({ loading: false });
+				});
+		}
+	};
+
+	validate = data => {
+		const errors = {};
+
+		if (!data.symbol) errors.symbol = "It's can't be blanck";
+		if (!data.volume) errors.volume = "It's can't be blanck";
+
+		return errors;
 	};
 
 	onChangeValue = values => {
@@ -62,6 +90,9 @@ class StocksForm extends React.Component {
 		return (
 			<div>
 				<Container>
+					{this.state.errors.global && (
+						<Alert color="danger">{this.state.errors.global}</Alert>
+					)}
 					<Card
 						body
 						id={1}
@@ -69,6 +100,9 @@ class StocksForm extends React.Component {
 						color="white"
 						className="text-center shadow"
 					>
+						{this.state.errors.symbol && (
+							<InlineError text={this.state.errors.symbol} />
+						)}
 						<Typeahead
 							id={2}
 							renderMenuItemChildren={option => (
@@ -88,9 +122,13 @@ class StocksForm extends React.Component {
 							options={this.props.suggestions}
 							placeholder="Type stocks tiket..."
 							className="pb-2"
+							disabled={this.state.loading}
 							onChange={this.handleOptionSelected}
 							selected={this.state.chosen}
 						/>
+						{this.state.errors.volume && (
+							<InlineError text={this.state.errors.volume} />
+						)}
 						<NumberFormat
 							className="mb-2"
 							customInput={Input}
@@ -106,9 +144,14 @@ class StocksForm extends React.Component {
 							onValueChange={this.onChangeValue}
 							disabled={this.state.loading}
 						/>
-						<Button color="primary" onClick={this.addToFavorite}>
+						<FormButton
+							loading={this.state.loading}
+							variant="primary"
+							block
+							submit={this.addToFavorite}
+						>
 							Add to favorite
-						</Button>
+						</FormButton>
 						{this.props.favoriteStocks.length > 0 && (
 							<Button
 								className="m-3"

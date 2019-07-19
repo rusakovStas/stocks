@@ -8,7 +8,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/stocks")
@@ -34,7 +33,6 @@ public class Stocks {
 
     @PostMapping
     Stock addToFavorite(@RequestBody Stock stock, Authentication authentication){
-        System.out.println(stock);
         return stocksService.addStockToFavorite(stock, authentication.getName());
     }
 

@@ -1,6 +1,8 @@
 package com.stasdev.backend.services.impl;
 
 import com.stasdev.backend.entitys.Stock;
+import com.stasdev.backend.errors.NoInformationAboutLatestPrice;
+import com.stasdev.backend.errors.NoInformationAboutSector;
 import com.stasdev.backend.services.IEXService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -50,29 +52,41 @@ public class IEXServiceImpl implements IEXService {
         Company company = cloudClient.executeRequest(new CompanyRequestBuilder()
                 .withSymbol(stock.getSymbol())
                 .build());
-        System.out.println(company);
+        validateCompany(company, stock.getSymbol());
         return mapCompanyToStock(company, getPriceStock(stock));
     }
 
     @Override
     public Stock getPriceStock(Stock stock) {
         Quote quote = cloudClient.executeRequest(new QuoteRequestBuilder().withSymbol(stock.getSymbol()).build());
-        System.out.println(quote);
+        validateQuote(quote, stock.getSymbol());
         return mapQuoteToStock(quote, stock);
     }
 
-    private Stock mapExchangeSymbolsToStock(ExchangeSymbol exchangeSymbol){
+    private Stock mapExchangeSymbolsToStock(ExchangeSymbol exchangeSymbol) {
         return new Stock()
                 .setName(exchangeSymbol.getName())
                 .setSymbol(exchangeSymbol.getSymbol())
                 .setIexId(exchangeSymbol.getIexId());
     }
 
-    private Stock mapQuoteToStock(Quote quote, Stock stock){
+    private void validateQuote(Quote quote, String symbol) {
+        if (quote.getLatestPrice() == null) {
+            throw new NoInformationAboutLatestPrice("No information about latest price for stock with symbol " + symbol);
+        }
+    }
+
+    private void validateCompany(Company company, String symbol) {
+        if (company.getSector() == null) {
+            throw new NoInformationAboutSector("No information about sector for stock with symbol " + symbol);
+        }
+    }
+
+    private Stock mapQuoteToStock(Quote quote, Stock stock) {
         return stock.setPrice(quote.getLatestPrice());
     }
 
-    private Stock mapCompanyToStock(Company company, Stock stock){
+    private Stock mapCompanyToStock(Company company, Stock stock) {
         return stock.setSector(company.getSector());
     }
 }
