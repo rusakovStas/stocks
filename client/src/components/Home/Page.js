@@ -12,10 +12,6 @@ import {
 
 class StocksPage extends React.Component {
 	state = {
-		mockStocks: [
-			{ symbol: "AAPL", name: "Apple inc.", iexId: "123" },
-			{ symbol: "SANP", name: "Name", iexId: "13" }
-		],
 		interval: {}
 	};
 
@@ -25,7 +21,7 @@ class StocksPage extends React.Component {
 		this.setState({
 			interval: setInterval(
 				() => this.props.getMyFavotiteStocks(),
-				1000 * 60
+				1000 * 60 * 15
 			)
 		});
 	}
