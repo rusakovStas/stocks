@@ -2,7 +2,7 @@ pipeline {
     agent any
      tools {
         nodejs 'my_js'
-        jdk 'java_11'
+        jdk 'java_8'
     }
     stages {
     stage('Create DB if not exist') {
