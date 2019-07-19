@@ -46,7 +46,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/users/all").hasRole("ADMIN")
                 .antMatchers(HttpMethod.POST,"/users").hasRole("ADMIN")
                 .antMatchers(HttpMethod.DELETE,"/users/**").hasRole("ADMIN")
-//                    .anyRequest().authenticated() //все что не указано явным образом - требует авторизации - почему то закрывает ресурсы с сайтом тоже
+                .antMatchers(HttpMethod.GET,"/stocks").hasAnyRole("USER","ADMIN")
+                .antMatchers(HttpMethod.GET,"/stocks/my").hasAnyRole("USER","ADMIN")
+                .antMatchers(HttpMethod.GET,"/stocks/summary").hasAnyRole("USER","ADMIN")
+                .antMatchers(HttpMethod.POST,"/stocks").hasAnyRole("USER","ADMIN")
+                .antMatchers(HttpMethod.DELETE,"/stocks").hasAnyRole("USER","ADMIN")
                 .and()
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager()))

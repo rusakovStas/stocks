@@ -13,6 +13,7 @@ import com.stasdev.backend.services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +25,7 @@ public class UsersServiceImpl implements UsersService {
     private final ApplicationUserRepository repository;
     private final PasswordEncoder bCryptPasswordEncoder;
     private final RoleRepository roleRepository;
+
 
     @Autowired
     public UsersServiceImpl(ApplicationUserRepository repository, PasswordEncoder bCryptPasswordEncoder, RoleRepository roleRepository) {

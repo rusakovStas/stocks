@@ -1,7 +1,9 @@
 package com.stasdev.backend.entitys;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -20,6 +22,14 @@ public class ApplicationUser {
             inverseJoinColumns = { @JoinColumn(name = "role_id") }
     )
     private Set<Role> roles = new HashSet<>();
+
+    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "User_Stock",
+            joinColumns = { @JoinColumn(name = "user_id") },
+            inverseJoinColumns = { @JoinColumn(name = "stockId") }
+    )
+    private List<Stock> stocks = new ArrayList<>();
 
     public ApplicationUser(String s, String pass, Set<Role> roles) {
         this.username = s;
@@ -77,5 +87,14 @@ public class ApplicationUser {
                 ", password='" + password + '\'' +
                 ", roles=" + roles +
                 '}';
+    }
+
+    public List<Stock> getStocks() {
+        return stocks;
+    }
+
+    public ApplicationUser setStocks(List<Stock> stocks) {
+        this.stocks = stocks;
+        return this;
     }
 }

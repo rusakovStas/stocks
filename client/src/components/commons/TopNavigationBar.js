@@ -22,8 +22,8 @@ class TopNavigationBar extends React.Component {
         const { logout } = this.props;
         return (
             <Navbar color="dark" dark expand="md" className="fixed-top">
-                <NavbarBrand tag={Link} to="/home">
-                    Home
+                <NavbarBrand tag={Link} to="/stocks">
+                    Stocks
                 </NavbarBrand>
                 <NavbarToggler onClick={this.toggle} />
                 <Collapse isOpen={this.state.isOpen} navbar>

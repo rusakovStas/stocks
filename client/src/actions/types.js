@@ -5,3 +5,9 @@ export const USER_ROLES = "USER_ROLES";
 export const GET_USERS = "GET_USERS";
 export const ADD_USER = "ADD_USER";
 export const DELETE_USER = "DELETE_USER";
+
+export const GET_STOCKS = "GET_STOCKS";
+export const ADD_STOCK = "ADD_STOCK";
+export const DELETE_STOCK = "DELETE_STOCK";
+export const GET_FAVORITE_STOCKS = "GET_FAVORITE_STOCKS";
+export const GET_FAVORITE_STOCKS_SUMMARY = "GET_FAVORITE_STOCKS_SUMMARY";

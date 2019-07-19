@@ -1,20 +1,82 @@
 import React from "react";
-import { Container } from "reactstrap";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import StocksForm from "./Form";
+import {
+	getStocks,
+	addStockToChosen,
+	deleteStockFromChosen,
+	getMyFavotiteStocks,
+	getSummary
+} from "../../actions/stocks";
 
-const HomePage = () => (
-	<Container>
-		<h1>Home Page</h1>
-		<p>
-			Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
-			nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam
-			erat, sed diam voluptua. At vero eos et accusam et justo duo dolores
-			et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est
-			Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
-			sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore
-			et dolore magna aliquyam erat, sed diam voluptua. At vero eos et
-			nulla facilisis at vero eros et accumsan et iusto odio dignissim qui
-		</p>
-	</Container>
-);
+class StocksPage extends React.Component {
+	state = {
+		mockStocks: [
+			{ symbol: "AAPL", name: "Apple inc.", iexId: "123" },
+			{ symbol: "SANP", name: "Name", iexId: "13" }
+		],
+		interval: {}
+	};
 
-export default HomePage;
+	componentDidMount() {
+		this.props.getStocks();
+		this.props.getMyFavotiteStocks();
+		this.setState({
+			interval: setInterval(
+				() => this.props.getMyFavotiteStocks(),
+				1000 * 60
+			)
+		});
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.state.interval);
+	}
+
+	render() {
+		return (
+			<StocksForm
+				suggestions={this.props.allStocks}
+				getSummary={this.props.getSummary}
+				summary={this.props.summary}
+				favoriteStocks={this.props.favoriteStocks}
+				add={this.props.addStockToChosen}
+				delete={this.props.deleteStockFromChosen}
+			/>
+		);
+	}
+}
+
+StocksPage.propTypes = {
+	allStocks: PropTypes.arrayOf(PropTypes.object).isRequired,
+	getMyFavotiteStocks: PropTypes.func.isRequired,
+	getSummary: PropTypes.func.isRequired,
+	summary: PropTypes.shape({
+		value: PropTypes.number.isRequired,
+		allocations: PropTypes.arrayOf(PropTypes.object).isRequired
+	}).isRequired,
+	favoriteStocks: PropTypes.arrayOf(PropTypes.object).isRequired,
+	getStocks: PropTypes.func.isRequired,
+	addStockToChosen: PropTypes.func.isRequired,
+	deleteStockFromChosen: PropTypes.func.isRequired
+};
+
+function mapStateToProps(state) {
+	return {
+		allStocks: state.stocks.allStocks,
+		favoriteStocks: state.stocks.favoriteStocks,
+		summary: state.stocks.summary
+	};
+}
+
+export default connect(
+	mapStateToProps,
+	{
+		getStocks,
+		addStockToChosen,
+		deleteStockFromChosen,
+		getMyFavotiteStocks,
+		getSummary
+	}
+)(StocksPage);

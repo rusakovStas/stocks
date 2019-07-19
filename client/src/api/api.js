@@ -29,5 +29,23 @@ export default {
 			axios
 				.delete(`http://${BASE_URL}/users?username=${user.username}`)
 				.then(response => response.data)
+	},
+	stocks: {
+		getAllStocks: () =>
+			axios.get(`http://${BASE_URL}/stocks`).then(res => res.data),
+		getMyStocks: () =>
+			axios.get(`http://${BASE_URL}/stocks/my`).then(res => res.data),
+		getSummaryForFavorite: () =>
+			axios
+				.get(`http://${BASE_URL}/stocks/summary`)
+				.then(res => res.data),
+		addStock: stock =>
+			axios
+				.post(`http://${BASE_URL}/stocks`, stock)
+				.then(response => response.data),
+		deleteStock: stock =>
+			axios
+				.delete(`http://${BASE_URL}/stocks?id=${stock.stockId}`)
+				.then(response => response.data)
 	}
 };

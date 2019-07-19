@@ -23,7 +23,8 @@ const AdminRoute = ({
 
 AdminRoute.propTypes = {
 	component: PropTypes.func.isRequired,
-	isAuthentifacated: PropTypes.bool.isRequired
+	isAuthentifacated: PropTypes.bool.isRequired,
+	hasRoleAdmin: PropTypes.bool.isRequired
 };
 
 function mapStateToProps(store) {
