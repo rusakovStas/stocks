@@ -6,6 +6,7 @@ import com.stasdev.backend.entitys.Stock;
 import com.stasdev.backend.entitys.StockSummary;
 import com.stasdev.backend.errors.InvalidStock;
 import com.stasdev.backend.errors.StockIsAlreadyInFavorite;
+import com.stasdev.backend.errors.StockNotFound;
 import com.stasdev.backend.errors.UserNotFound;
 import com.stasdev.backend.repos.ApplicationUserRepository;
 import com.stasdev.backend.repos.StocksRepository;
@@ -33,7 +34,6 @@ public class StocksServiceImpl implements StocksService {
         this.userRepository = userRepository;
     }
 
-
     @Override
     public List<Stock> getAllStocks() {
         return iexService.getAllStocksFromIEX();
@@ -42,24 +42,21 @@ public class StocksServiceImpl implements StocksService {
     @Override
     public List<Stock> getMyStocks(String userName) {
         ApplicationUser currentUser = userRepository.findByUsername(userName).orElseThrow(() -> new UserNotFound("User with name " + userName + " not found"));
-        List<Stock> stocks = stocksRepository.findAllByUsersContains(currentUser)
+        return stocksRepository.findAllByUser(currentUser)
                 .parallelStream()
                 .map(iexService::getPriceStock)//Обновляем котировки при запросе избранных акций
-                .peek(stocksRepository::saveAndFlush)
-                .collect(Collectors.toList());
-        stocks.sort(Comparator.comparing(Stock::getStockId));
-        return stocks;
+                .peek(stocksRepository::saveAndFlush).sorted(Comparator.comparing(Stock::getStockId)).collect(Collectors.toList());
     }
 
     @Override
     public Stock addStockToFavorite(Stock stock, String userName) {
         ApplicationUser currentUser = userRepository.findByUsername(userName).orElseThrow(() -> new UserNotFound("User with name " + userName + " not found"));
         this.validateStock(stock);
-        if (currentUser.getStocks().contains(stock)){
-            throw new StockIsAlreadyInFavorite("Stock with symbol "+ stock.getSymbol() + " is already in your favorite list");
+        if (currentUser.getStocks().contains(stock)) {
+            throw new StockIsAlreadyInFavorite("Stock with symbol '" + stock.getSymbol() + "' is already in your favorite list");
         }
         Stock stockWithPriceAndSector = iexService.getPriceAndSectorForStock(stock);
-        stockWithPriceAndSector.getUsers().add(currentUser);
+        stockWithPriceAndSector.setUser(currentUser);
         currentUser.getStocks().add(stockWithPriceAndSector);
         return stocksRepository.saveAndFlush(stockWithPriceAndSector);
     }
@@ -67,7 +64,7 @@ public class StocksServiceImpl implements StocksService {
     @Override
     public StockSummary getFavoriteStockSummary(String userName) {
         ApplicationUser currentUser = userRepository.findByUsername(userName).orElseThrow(() -> new UserNotFound("User with name " + userName + " not found"));
-        List<Stock> myStocks = stocksRepository.findAllByUsersContains(currentUser);
+        List<Stock> myStocks = stocksRepository.findAllByUser(currentUser);
         StockSummary summary = summary(myStocks);
         System.out.println(summary);
         return summary(myStocks);
@@ -75,21 +72,23 @@ public class StocksServiceImpl implements StocksService {
 
     @Override
     public void deleteStock(Long stockId, String userName) {
-        Stock byId = stocksRepository.findById(stockId).orElseThrow(() -> new RuntimeException("asdcasdc"));
+        Stock byId = stocksRepository.findById(stockId).orElseThrow(() -> new StockNotFound("stock with id " + stockId + " not found"));
         ApplicationUser currentUser = userRepository.findByUsername(userName).orElseThrow(() -> new UserNotFound("User with name " + userName + " not found"));
-        if (!currentUser.getStocks().contains(byId)){
-            throw new RuntimeException("you don't have that stocks in your favorite list");
+        if (!currentUser.getStocks().contains(byId)) {
+            throw new RuntimeException("You don't have that stocks in your favorite list");
         }
         currentUser.getStocks().remove(byId);
         userRepository.saveAndFlush(currentUser);
+        stocksRepository.deleteById(stockId);
+        stocksRepository.flush();
     }
 
-    private StockSummary summary(List<Stock> stocks){
+    private StockSummary summary(List<Stock> stocks) {
         List<Allocation> allocations = new ArrayList<>();
         Map<String, BigDecimal> sectorsSumm = new HashMap<>();
         BigDecimal value = new BigDecimal("0");
         for (Stock stock : stocks) {
-            sectorsSumm.computeIfPresent(stock.getSector(), (k,v) -> v.add(stock.getVolume().multiply(stock.getPrice())));
+            sectorsSumm.computeIfPresent(stock.getSector(), (k, v) -> v.add(stock.getVolume().multiply(stock.getPrice())));
             sectorsSumm.computeIfAbsent(stock.getSector(), (k) -> stock.getVolume().multiply(stock.getPrice()));
             value = value.add(stock.getPrice().multiply(stock.getVolume()));
         }
@@ -105,11 +104,11 @@ public class StocksServiceImpl implements StocksService {
                 .setValue(value);
     }
 
-    private void validateStock(Stock stock){
-        if (stock.getSymbol() == null || stock.getSymbol().isEmpty()){
+    private void validateStock(Stock stock) {
+        if (stock.getSymbol() == null || stock.getSymbol().isEmpty()) {
             throw new InvalidStock("Symbol can't be null");
         }
-        if (stock.getVolume() == null ){
+        if (stock.getVolume() == null) {
             throw new InvalidStock("Volume can't be null");
         }
     }

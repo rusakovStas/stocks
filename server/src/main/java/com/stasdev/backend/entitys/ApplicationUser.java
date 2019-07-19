@@ -1,5 +1,7 @@
 package com.stasdev.backend.entitys;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,12 +25,8 @@ public class ApplicationUser {
     )
     private Set<Role> roles = new HashSet<>();
 
-    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "User_Stock",
-            joinColumns = { @JoinColumn(name = "user_id") },
-            inverseJoinColumns = { @JoinColumn(name = "stockId") }
-    )
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Stock> stocks = new ArrayList<>();
 
     public ApplicationUser(String s, String pass, Set<Role> roles) {

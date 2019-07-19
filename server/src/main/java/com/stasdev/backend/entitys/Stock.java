@@ -32,9 +32,9 @@ public class Stock {
                 '}';
     }
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "stocks", fetch = FetchType.EAGER)
-    private List<ApplicationUser> users = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private ApplicationUser user;
 
     public Long getStockId() {
         return stockId;
@@ -81,12 +81,12 @@ public class Stock {
         return this;
     }
 
-    public List<ApplicationUser> getUsers() {
-        return users;
+    public ApplicationUser getUser() {
+        return user;
     }
 
-    public Stock setUsers(List<ApplicationUser> users) {
-        this.users = users;
+    public Stock setUser(ApplicationUser user) {
+        this.user = user;
         return this;
     }
 

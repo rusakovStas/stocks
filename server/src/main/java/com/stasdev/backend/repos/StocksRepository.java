@@ -9,6 +9,6 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface StocksRepository extends JpaRepository<Stock, Long> {
-    List<Stock> findAllByUsersContains(ApplicationUser user);
+    List<Stock> findAllByUser(ApplicationUser user);
     Optional<Stock> findBySymbol(String symbol);
 }
