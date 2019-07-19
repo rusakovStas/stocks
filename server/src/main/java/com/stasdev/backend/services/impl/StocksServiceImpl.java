@@ -65,8 +65,6 @@ public class StocksServiceImpl implements StocksService {
     public StockSummary getFavoriteStockSummary(String userName) {
         ApplicationUser currentUser = userRepository.findByUsername(userName).orElseThrow(() -> new UserNotFound("User with name " + userName + " not found"));
         List<Stock> myStocks = stocksRepository.findAllByUser(currentUser);
-        StockSummary summary = summary(myStocks);
-        System.out.println(summary);
         return summary(myStocks);
     }
 

@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import StocksPage from "./components/Home/Page";
+import StocksPage from "./components/Stocks/Page";
 import LoginPage from "./components/Login/Page";
 import UserPage from "./components/User/Page";
 import GuestRoute from "./components/commons/GuestRoute";
