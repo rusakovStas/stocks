@@ -36,7 +36,10 @@ class StocksForm extends React.Component {
 
 	show = val => {
 		if (val) {
-			this.props.getSummary();
+			this.setState({ loading: true });
+			this.props
+				.getSummary()
+				.then(() => this.setState({ open: val, loading: false }));
 		}
 		this.setState({ open: val });
 	};
@@ -153,13 +156,16 @@ class StocksForm extends React.Component {
 							Add to favorite
 						</FormButton>
 						{this.props.favoriteStocks.length > 0 && (
-							<Button
-								className="m-3"
-								color="success"
-								onClick={() => this.show(true)}
-							>
-								Get Summary
-							</Button>
+							<div className="m-3">
+								<FormButton
+									loading={this.state.loading}
+									variant="success"
+									block
+									submit={() => this.show(true)}
+								>
+									Get Summary
+								</FormButton>
+							</div>
 						)}
 					</Card>
 					<Row>
@@ -187,7 +193,6 @@ class StocksForm extends React.Component {
 						))}
 					</Row>
 				</Container>
-
 				<Modal
 					isOpen={this.state.open}
 					toggle={() => this.show(!this.state.open)}

@@ -44,11 +44,10 @@ export const getMyFavotiteStocks = () => dispatch => {
 	});
 };
 
-export const getSummary = () => dispatch => {
+export const getSummary = () => dispatch =>
 	api.stocks.getSummaryForFavorite().then(summary => {
 		dispatch(getSummaryForStocks(summary));
 	});
-};
 
 export const addStockToChosen = data => dispatch =>
 	api.stocks.addStock(data).then(chosenStock => {
